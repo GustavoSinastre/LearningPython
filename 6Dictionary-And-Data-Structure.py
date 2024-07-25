@@ -78,3 +78,4 @@ for product in product_dictionary:
 print("Preço atualizado em 10%")
 print(product_dictionary)
 
+
