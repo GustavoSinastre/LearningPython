@@ -91,7 +91,7 @@ data_frame = pd.DataFrame({
 })
 
 # Exportation data
-exportation_path = r'C:\Users\luisg\OneDrive\Projet Dev\Exports'
+exportation_path = r'C:\Users\luisg\OneDrive\Project Dev\Exports\Python\7Functions-And-Exercises'
 file_name = 'Precificação Produtos.xlsx'
 full_path = os.path.join(exportation_path,file_name)
 
