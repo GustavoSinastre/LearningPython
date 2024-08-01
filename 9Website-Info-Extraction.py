@@ -4,7 +4,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
 from time import sleep
+
 
 # Importing the sheet's useds
 workbook_path = 'Files-9Website-Info-Extraction/Lista de Ações.xlsx'
@@ -15,22 +17,21 @@ final_page = workbook['Resultado']
 # Clear the final page starting from the second row
 final_page.delete_rows(1, final_page.max_row)
 
-# Add headers to the final_page
-headers = [
-    'ATIVO', 'TIPO', 'COTAÇÃO', 
-    'Rent. 1 mês', 'Rent. 3 meses', 'Rent. 1 ano', 'Rent. 2 anos', 'Rent. 5 anos', 'Rent. 10 anos',
-    'Rent. Real 3 meses', 'Rent. Real 1 ano', 'Rent. Real 2 anos', 'Rent. Real 5 anos', 'Rent. Real 10 anos']
-final_page.append(headers)
-
 # Check if there are data in the search page
 if search_page.max_row < 2:
     print("No data to process in the search page.")
 else:
-    # Opening the website
-    driver = webdriver.Chrome()
-    wait = WebDriverWait(driver, 15)
+    # Set up Chrome options
+    chrome_options = Options()
+    # chrome_options.add_argument("--headless")  # Uncomment if you want to run Chrome headless
+
+    # Initialize the WebDriver with options
+    driver = webdriver.Chrome(options=chrome_options)
+    wait = WebDriverWait(driver, 10)  # Adjusted wait time
 
     # Creating the search loop
+    headers_written = False
+
     for row in search_page.iter_rows(min_row=2, values_only=True):
         ATIVO, TIPO = row
         # Open the website with the complete link
@@ -39,40 +40,128 @@ else:
         driver.get(complete_url)
 
         try:
-            # Try to find the element and extract the text, processing it directly
-            cotação_clean = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@class='_card-body']//span[@class='value']"))).text.replace('R$ ', '').strip()
-
-            # Extract the values for each month and other periods
+            headers = []
             values = []
-            for i in range(2, 8):  # Extracting the previous periods
-                xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/span"
-                try:
-                    value = wait.until(EC.presence_of_element_located((By.XPATH, xpath))).text
-                except Exception as e:
-                    value = None  # Handle cases where the element might not be found
-                values.append(value)
 
-            # Extract the additional values for Rent. Real
-            for i in range(10, 15):  # Extracting Rent. Real periods
-                xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/span"
-                try:
-                    value = wait.until(EC.presence_of_element_located((By.XPATH, xpath))).text
-                except Exception as e:
-                    value = None  # Handle cases where the element might not be found
-                values.append(value)
+            # COTAÇÃO E VARIAÇÃO 12M
+            try:
+                for i in range(1, 3):
+                    header_xpath = f"//*[@id='cards-ticker']/div[{i}]/div[1]/div/span"
+                    header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                    header = header_element.text
+                    headers.append(header)
 
-            # Append data to the final page
-            final_page.append([ATIVO, TIPO, cotação_clean] + values)
+                    value_xpath = f"//*[@id='cards-ticker']/div[{i}]/div[2]/div/span"
+                    value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                    value = value_element.text
+                    values.append(value)
+            except Exception as e:
+                print(f"Error getting COTAÇÃO E VARIAÇÃO 12M data: {e}")
+
+            # RENTABILIDADE DETALHADA
+            try:
+                for i in range(2, 8):
+                    header_xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/h4"
+                    header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                    header = header_element.text
+                    headers.append(header)
+
+                    value_xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/span"
+                    value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                    value = value_element.text
+                    values.append(value)
+            except Exception as e:
+                print(f"Error getting RENTABILIDADE DETALHADA data: {e}")
+
+            # RENTABILIDADE REAL DETALHADA
+            try:
+                for i in range(10, 15):
+                    header_xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/h4"
+                    header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                    header = header_element.text
+                    headers.append(header)
+
+                    value_xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/span"
+                    value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                    value = value_element.text
+                    values.append(value)
+            except Exception as e:
+                print(f"Error getting RENTABILIDADE REAL DETALHADA data: {e}")
+
+            # INDICADORES FUNDAMENTALISTAS
+            try:
+                for i in range(1, 32):
+                    header_xpath = f"//*[@id='table-indicators']/div[{i}]/span"
+                    header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                    header = header_element.text
+                    headers.append(header)
+
+                    value_xpath = f"//*[@id='table-indicators']/div[{i}]/div[1]/span"
+                    value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                    value = value_element.text
+                    values.append(value)
+            except Exception as e:
+                print(f"Error getting INDICADORES FUNDAMENTALISTAS data: {e}")
+
+            # DIVIDENDOS DOS ÚLTIMOS 5 ANOS
+            try:
+                header_xpath = "//*[@id='dividends-section']/div[1]/div[1]/h3[2]"
+                header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                header = header_element.text
+                headers.append(header)
+
+                value_xpath = "//*[@id='dividends-section']/div[1]/div[1]/h3[2]/span"
+                value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                value = value_element.text
+                values.append(value)
+            except Exception as e:
+                print(f"Error getting DIVIDENDOS DOS ÚLTIMOS 5 ANOS data: {e}")
+
+            # DADOS SOBRE A EMPRESA
+            try:
+                for i in range(1, 6):
+                    header_xpath = f"//*[@id='data_about']/div[2]/div/div[1]/table/tbody/tr[{i}]/td[1]"
+                    header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                    header = header_element.text
+                    headers.append(header)
+
+                    value_xpath = f"//*[@id='data_about']/div[2]/div/div[1]/table/tbody/tr[{i}]/td[2]"
+                    value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                    value = value_element.text
+                    values.append(value)
+            except Exception as e:
+                print(f"Error getting DADOS SOBRE A EMPRESA data: {e}")
+
+            # INFORMAÇÕES SOBRE A EMPRESA
+            try:   
+                for i in range(1, 16):
+                    header_xpath = f"//*[@id='table-indicators-company']/div[{i}]/span[1]"
+                    header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
+                    header = header_element.text
+                    headers.append(header)
+
+                    value_xpath = f"//*[@id='table-indicators-company']/div[{i}]/span[2]/div[1]"
+                    value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
+                    value = value_element.text
+                    values.append(value)
+            except Exception as e:
+                print(f"Error getting INFORMAÇÕES SOBRE A EMPRESA data: {e}")
+
+            # Add data to final page
+            if not headers_written:
+                final_page.append(['ATIVO', 'TIPO'] + headers)
+                headers_written = True
+
+            final_page.append([ATIVO, TIPO] + values)
+            print(f"Values written: {values}")
 
         except Exception as e:
-            # Capture and print the error message
             print(f"Error for {ATIVO} - {TIPO}: {e}")
 
-        # Sleep to avoid overwhelming the server
-        sleep(1)
-
-    # Save the workbook after all rows have been processed
+    # Save changes to workbook
     workbook.save(workbook_path)
+    print("Workbook saved.")
 
     # Close the browser
     driver.quit()
+    print("Driver closed.")
