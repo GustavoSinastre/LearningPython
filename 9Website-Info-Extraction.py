@@ -44,8 +44,8 @@ else:
             values = []
 
             # COTAÇÃO E VARIAÇÃO 12M
-            try:
-                for i in range(1, 3):
+            for i in range(1, 3):
+                try:
                     header_xpath = f"//*[@id='cards-ticker']/div[{i}]/div[1]/div/span"
                     header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
                     header = header_element.text
@@ -55,12 +55,14 @@ else:
                     value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
                     value = value_element.text
                     values.append(value)
-            except Exception as e:
-                print(f"Error getting COTAÇÃO E VARIAÇÃO 12M data: {e}")
+                except Exception as e:
+                    print(f"Error getting COTAÇÃO E VARIAÇÃO 12M data at index {i}: {e}")
+                    headers.append(f"Header {i}")
+                    values.append("-")
 
             # RENTABILIDADE DETALHADA
-            try:
-                for i in range(2, 8):
+            for i in range(2, 8):
+                try:
                     header_xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/h4"
                     header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
                     header = header_element.text
@@ -70,12 +72,14 @@ else:
                     value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
                     value = value_element.text
                     values.append(value)
-            except Exception as e:
-                print(f"Error getting RENTABILIDADE DETALHADA data: {e}")
+                except Exception as e:
+                    print(f"Error getting RENTABILIDADE DETALHADA data at index {i}: {e}")
+                    headers.append(f"Header {i}")
+                    values.append("-")
 
             # RENTABILIDADE REAL DETALHADA
-            try:
-                for i in range(10, 15):
+            for i in range(10, 15):
+                try:
                     header_xpath = f"//*[@id='ticker']/section/div/div[2]/div/div/div[{i}]/h4"
                     header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
                     header = header_element.text
@@ -85,12 +89,14 @@ else:
                     value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
                     value = value_element.text
                     values.append(value)
-            except Exception as e:
-                print(f"Error getting RENTABILIDADE REAL DETALHADA data: {e}")
+                except Exception as e:
+                    print(f"Error getting RENTABILIDADE REAL DETALHADA data at index {i}: {e}")
+                    headers.append(f"Header {i}")
+                    values.append("-")
 
             # INDICADORES FUNDAMENTALISTAS
-            try:
-                for i in range(1, 32):
+            for i in range(1, 32):
+                try:
                     header_xpath = f"//*[@id='table-indicators']/div[{i}]/span"
                     header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
                     header = header_element.text
@@ -100,8 +106,10 @@ else:
                     value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
                     value = value_element.text
                     values.append(value)
-            except Exception as e:
-                print(f"Error getting INDICADORES FUNDAMENTALISTAS data: {e}")
+                except Exception as e:
+                    print(f"Error getting INDICADORES FUNDAMENTALISTAS data at index {i}: {e}")
+                    headers.append(f"Header {i}")
+                    values.append("-")
 
             # DIVIDENDOS DOS ÚLTIMOS 5 ANOS
             try:
@@ -116,10 +124,12 @@ else:
                 values.append(value)
             except Exception as e:
                 print(f"Error getting DIVIDENDOS DOS ÚLTIMOS 5 ANOS data: {e}")
+                headers.append("DIVIDENDOS DOS ÚLTIMOS 5 ANOS")
+                values.append("-")
 
             # DADOS SOBRE A EMPRESA
-            try:
-                for i in range(1, 6):
+            for i in range(1, 6):
+                try:
                     header_xpath = f"//*[@id='data_about']/div[2]/div/div[1]/table/tbody/tr[{i}]/td[1]"
                     header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
                     header = header_element.text
@@ -129,12 +139,14 @@ else:
                     value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
                     value = value_element.text
                     values.append(value)
-            except Exception as e:
-                print(f"Error getting DADOS SOBRE A EMPRESA data: {e}")
+                except Exception as e:
+                    print(f"Error getting DADOS SOBRE A EMPRESA data at index {i}: {e}")
+                    headers.append(f"Header {i}")
+                    values.append("-")
 
             # INFORMAÇÕES SOBRE A EMPRESA
-            try:   
-                for i in range(1, 16):
+            for i in range(1, 10):
+                try:   
                     header_xpath = f"//*[@id='table-indicators-company']/div[{i}]/span[1]"
                     header_element = wait.until(EC.visibility_of_element_located((By.XPATH, header_xpath)))
                     header = header_element.text
@@ -144,8 +156,10 @@ else:
                     value_element = wait.until(EC.visibility_of_element_located((By.XPATH, value_xpath)))
                     value = value_element.text
                     values.append(value)
-            except Exception as e:
-                print(f"Error getting INFORMAÇÕES SOBRE A EMPRESA data: {e}")
+                except Exception as e:
+                    print(f"Error getting INFORMAÇÕES SOBRE A EMPRESA data at index {i}: {e}")
+                    headers.append(f"Header {i}")
+                    values.append("-")
 
             # Add data to final page
             if not headers_written:
